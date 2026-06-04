@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BoatGoat">
+<title>BoatGoat</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #050e1a;
+    --deep: #081628;
+    --panel: #0a1f35;
+    --brass: #c8922a;
+    --brass-light: #e8b84b;
+    --brass-dim: #7a5a1a;
+    --teal: #00d4c8;
+    --teal-dim: #005f5a;
+    --red: #ff4444;
+    --orange: #ff8c00;
+    --green: #00e676;
+    --text: #cce0f0;
+    --text-dim: #5a7a9a;
+    --glow: 0 0 20px rgba(0,212,200,0.4);
+    --brass-glow: 0 0 15px rgba(200,146,42,0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(0,100,150,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,50,100,0.2) 0%, transparent 60%);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(180deg, #081e33 0%, var(--panel) 100%);
+    border-bottom: 1px solid var(--brass-dim);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: var(--brass-light);
+    letter-spacing: 0.1em;
+    text-shadow: var(--brass-glow);
+  }
+
+  .logo span { color: var(--teal); }
+
+  .header-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  /* Location bar */
+  .location-bar {
+    background: var(--panel);
+    border-bottom: 1px solid rgba(200,146,42,0.2);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .location-icon {
+    color: var(--teal);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .location-search-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .location-input {
+    width: 100%;
+    background: rgba(0,212,200,0.06);
+    border: 1px solid var(--teal-dim);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    outline: none;
+  }
+
+  .location-input::placeholder { color: var(--text-dim); }
+  .location-input:focus { border-color: var(--teal); }
+
+  .suggestions-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: #0d2540;
+    border: 1px solid var(--teal-dim);
+    border-radius: 4px;
+    z-index: 200;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+  }
+
+  .suggestions-list.open { display: block; }
+
+  .suggestion-item {
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:active, .suggestion-item.highlighted { background: rgba(0,212,200,0.12); color: var(--teal); }
+
+  .refresh-btn {
+    background: rgba(0,212,200,0.1);
+    border: 1px solid var(--teal-dim);
+    color: var(--teal);
+    padding: 7px 12px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .refresh-btn:active { background: rgba(0,212,200,0.25); }
+
+  /* Big Score */
+  .score-section {
+    padding: 24px 20px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .score-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .score-ring-wrap {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    margin: 10px 0;
+  }
+
+  .score-ring-wrap svg {
+    transform: rotate(-135deg);
+  }
+
+  .score-track {
+    fill: none;
+    stroke: var(--panel);
+    stroke-width: 14;
+  }
+
+  .score-fill {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1),
+                stroke 0.5s ease;
+  }
+
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-number {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 2.8rem;
+    line-height: 1;
+    transition: color 0.5s;
+  }
+
+  .score-out-of {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .score-verdict {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 8px 24px;
+    border-radius: 3px;
+    text-align: center;
+    transition: all 0.5s;
+  }
+
+  /* Gauge grid */
+  .gauges-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    padding: 16px 20px 6px;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(200,146,42,0.15);
+    margin-top: 10px;
+  }
+
+  .gauges-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 14px 14px;
+  }
+
+  .gauge-card {
+    background: var(--panel);
+    border: 1px solid rgba(200,146,42,0.2);
+    border-radius: 8px;
+    padding: 14px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gauge-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--brass-dim), transparent);
+  }
+
+  .gauge-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* Arc gauge */
+  .arc-wrap {
+    position: relative;
+    width: 110px;
+    height: 65px;
+    overflow: hidden;
+  }
+
+  .arc-wrap svg {
+    position: absolute;
+    top: 0; left: 0;
+  }
+
+  .arc-track {
+    fill: none;
+    stroke: #0d2540;
+    stroke-width: 10;
+  }
+
+  .arc-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1),
+                stroke 0.5s ease;
+  }
+
+  .arc-needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    height: 50px;
+    background: white;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-90deg);
+    transition: transform 1.2s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 2px;
+  }
+
+  .arc-needle::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    background: var(--brass);
+    border-radius: 50%;
+  }
+
+  .gauge-value {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .gauge-unit {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: -4px;
+  }
+
+  .gauge-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 3px;
+    text-align: center;
+  }
+
+  /* Condition bars */
+  .conditions-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+    padding: 10px 20px 8px;
+    text-transform: uppercase;
+    border-top: 1px solid rgba(200,146,42,0.15);
+  }
+
+  .condition-rows {
+    padding: 0 14px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cond-row {
+    background: var(--panel);
+    border: 1px solid rgba(200,146,42,0.15);
+    border-radius: 6px;
+    padding: 10px 14px;
+  }
+
+  .cond-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .cond-name {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .cond-score-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .cond-bar-bg {
+    height: 5px;
+    background: #0d2540;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .cond-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .cond-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+
+  /* Alerts */
+  .alerts-section {
+    padding: 0 14px 10px;
+  }
+
+  .alert-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .alert-icon { font-size: 1rem; flex-shrink: 0; }
+
+  /* Loading */
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--navy);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    z-index: 999;
+    transition: opacity 0.5s;
+  }
+
+  .loading-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loading-logo {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--brass-light);
+    text-shadow: var(--brass-glow);
+  }
+
+  .loading-logo span { color: var(--teal); }
+
+  .loading-msg {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--teal-dim);
+    border-top-color: var(--teal);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .pulse-ring {
+    width: 6px; height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(2); opacity: 0.3; }
+  }
+
+  /* Error */
+  .error-msg {
+    background: rgba(255,68,68,0.1);
+    border: 1px solid rgba(255,68,68,0.3);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 20px 14px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: #ff8888;
+    line-height: 1.5;
+  }
+
+  /* Timestamp */
+  .timestamp {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 0 0 16px;
+  }
+
+  /* Color helpers */
+  .c-green { color: var(--green); }
+  .c-orange { color: var(--orange); }
+  .c-red { color: var(--red); }
+  .c-teal { color: var(--teal); }
+  .c-brass { color: var(--brass-light); }
+
+  .bg-green { background: rgba(0,230,118,0.12); border-color: rgba(0,230,118,0.3); }
+  .bg-orange { background: rgba(255,140,0,0.12); border-color: rgba(255,140,0,0.3); }
+  .bg-red { background: rgba(255,68,68,0.12); border-color: rgba(255,68,68,0.3); }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-logo">BOAT<span>GOAT</span></div>
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loadingMsg">Fetching weather data...</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">BOAT<span>GOAT</span></div>
+  <div class="header-status" id="headerStatus">—</div>
+</div>
+
+<!-- Location Bar -->
+<div class="location-bar">
+  <div class="location-icon">⚓</div>
+  <div class="location-search-wrap">
+    <input class="location-input" id="locationInput" type="text"
+      placeholder="Search city..." autocomplete="off" spellcheck="false"
+      oninput="onSearchInput(this.value)"
+      onkeydown="onSearchKey(event)"/>
+    <div class="suggestions-list" id="suggestionsList"></div>
+  </div>
+  <button class="refresh-btn" onclick="fetchForSelected()">↻ GO</button>
+</div>
+
+<!-- Main content -->
+<div id="mainContent" style="display:none">
+
+  <!-- Big Score -->
+  <div class="score-section">
+    <div class="score-label">Overall Boating Conditions</div>
+    <div class="score-ring-wrap">
+      <svg width="180" height="180" viewBox="0 0 180 180">
+        <!-- 270° arc centered -->
+        <circle class="score-track" cx="90" cy="90" r="74"
+          stroke-dasharray="350 999" stroke-dashoffset="-40"/>
+        <circle class="score-fill" id="scoreFill" cx="90" cy="90" r="74"
+          stroke-dasharray="0 999" stroke-dashoffset="-40" stroke="var(--green)"/>
+      </svg>
+      <div class="score-center">
+        <div class="score-number c-green" id="scoreNumber">0</div>
+        <div class="score-out-of">/100</div>
+      </div>
+    </div>
+    <div class="score-verdict" id="scoreVerdict">—</div>
+  </div>
+
+  <!-- Gauges -->
+  <div class="gauges-title">▸ LIVE INSTRUMENT READINGS</div>
+  <div class="gauges-grid">
+
+    <!-- Wind Speed -->
+    <div class="gauge-card">
+      <div class="gauge-label">Wind Speed</div>
+      <div class="arc-wrap" id="windArc">
+        <svg width="110" height="65" viewBox="0 0 110 65">
+          <path class="arc-track" d="M 10 62 A 50 50 0 0 1 100 62"/>
+          <path class="arc-fill" id="windFill" d="M 10 62 A 50 50 0 0 1 100 62"
+            stroke-dasharray="0 999"/>
+        </svg>
+        <div class="arc-needle" id="windNeedle"></div>
+      </div>
+      <div class="gauge-value c-teal" id="windVal">—</div>
+      <div class="gauge-unit">mph</div>
+      <div class="gauge-sub" id="windSub">—</div>
+    </div>
+
+    <!-- Wave / Visibility proxy: use cloud cover -->
+    <div class="gauge-card">
+      <div class="gauge-label">Cloud Cover</div>
+      <div class="arc-wrap">
+        <svg width="110" height="65" viewBox="0 0 110 65">
+          <path class="arc-track" d="M 10 62 A 50 50 0 0 1 100 62"/>
+          <path class="arc-fill" id="cloudFill" d="M 10 62 A 50 50 0 0 1 100 62"
+            stroke-dasharray="0 999"/>
+        </svg>
+        <div class="arc-needle" id="cloudNeedle"></div>
+      </div>
+      <div class="gauge-value c-teal" id="cloudVal">—</div>
+      <div class="gauge-unit">%</div>
+      <div class="gauge-sub" id="cloudSub">—</div>
+    </div>
+
+    <!-- Temperature -->
+    <div class="gauge-card">
+      <div class="gauge-label">Temperature</div>
+      <div class="arc-wrap">
+        <svg width="110" height="65" viewBox="0 0 110 65">
+          <path class="arc-track" d="M 10 62 A 50 50 0 0 1 100 62"/>
+          <path class="arc-fill" id="tempFill" d="M 10 62 A 50 50 0 0 1 100 62"
+            stroke-dasharray="0 999"/>
+        </svg>
+        <div class="arc-needle" id="tempNeedle"></div>
+      </div>
+      <div class="gauge-value c-teal" id="tempVal">—</div>
+      <div class="gauge-unit">°F</div>
+      <div class="gauge-sub" id="tempSub">—</div>
+    </div>
+
+    <!-- Precipitation -->
+    <div class="gauge-card">
+      <div class="gauge-label">Precip. Chance</div>
+      <div class="arc-wrap">
+        <svg width="110" height="65" viewBox="0 0 110 65">
+          <path class="arc-track" d="M 10 62 A 50 50 0 0 1 100 62"/>
+          <path class="arc-fill" id="precipFill" d="M 10 62 A 50 50 0 0 1 100 62"
+            stroke-dasharray="0 999"/>
+        </svg>
+        <div class="arc-needle" id="precipNeedle"></div>
+      </div>
+      <div class="gauge-value c-teal" id="precipVal">—</div>
+      <div class="gauge-unit">%</div>
+      <div class="gauge-sub" id="precipSub">—</div>
+    </div>
+
+  </div>
+
+  <!-- Condition breakdown -->
+  <div class="conditions-title">▸ CONDITION BREAKDOWN</div>
+  <div class="condition-rows" id="conditionRows"></div>
+
+</div>
+
+<!-- Error -->
+<div id="errorDiv" style="display:none">
+  <div class="error-msg" id="errorMsg">Unable to load weather data.</div>
+</div>
+
+<script>
+const OPEN_METEO = 'https://api.open-meteo.com/v1/forecast';
+const NOMINATIM_SEARCH = 'https://nominatim.openstreetmap.org/search';
+
+// Popular boating locations list
+const PRESET_CITIES = [
+  { name: 'Orlando, FL', lat: 28.5383, lon: -81.3792 },
+  { name: 'Miami, FL', lat: 25.7617, lon: -80.1918 },
+  { name: 'Tampa, FL', lat: 27.9506, lon: -82.4572 },
+  { name: 'Jacksonville, FL', lat: 30.3322, lon: -81.6557 },
+  { name: 'Fort Lauderdale, FL', lat: 26.1224, lon: -80.1373 },
+  { name: 'Key West, FL', lat: 24.5551, lon: -81.7800 },
+  { name: 'Clearwater, FL', lat: 27.9659, lon: -82.8001 },
+  { name: 'Sarasota, FL', lat: 27.3364, lon: -82.5307 },
+  { name: 'Naples, FL', lat: 26.1420, lon: -81.7948 },
+  { name: 'Destin, FL', lat: 30.3935, lon: -86.4958 },
+  { name: 'Pensacola, FL', lat: 30.4213, lon: -87.2169 },
+  { name: 'New Orleans, LA', lat: 29.9511, lon: -90.0715 },
+  { name: 'Houston, TX', lat: 29.7604, lon: -95.3698 },
+  { name: 'Galveston, TX', lat: 29.3013, lon: -94.7977 },
+  { name: 'San Diego, CA', lat: 32.7157, lon: -117.1611 },
+  { name: 'Los Angeles, CA', lat: 34.0522, lon: -118.2437 },
+  { name: 'Seattle, WA', lat: 47.6062, lon: -122.3321 },
+  { name: 'Charleston, SC', lat: 32.7765, lon: -79.9311 },
+  { name: 'Annapolis, MD', lat: 38.9784, lon: -76.4922 },
+  { name: 'New York, NY', lat: 40.7128, lon: -74.0060 },
+  { name: 'Boston, MA', lat: 42.3601, lon: -71.0589 },
+  { name: 'Chicago, IL', lat: 41.8781, lon: -87.6298 },
+  { name: 'Lake Tahoe, CA', lat: 39.0968, lon: -120.0324 },
+  { name: 'Minneapolis, MN', lat: 44.9778, lon: -93.2650 },
+  { name: 'Nashville, TN', lat: 36.1627, lon: -86.7816 },
+];
+
+let currentLat = 28.5383, currentLon = -81.3792;
+let currentCityName = 'Orlando, FL';
+let searchTimeout = null;
+let highlightIdx = -1;
+let searchResults = [];
+
+// ===== SCORE LOGIC =====
+function scoreWind(mph) {
+  if (mph <= 5)  return { score: 100, label: 'Glassy', cls: 'c-green' };
+  if (mph <= 12) return { score: 88,  label: 'Calm',   cls: 'c-green' };
+  if (mph <= 20) return { score: 65,  label: 'Breezy', cls: 'c-brass' };
+  if (mph <= 30) return { score: 35,  label: 'Choppy', cls: 'c-orange' };
+  return { score: 10, label: 'Rough', cls: 'c-red' };
+}
+function scorePrecip(pct) {
+  if (pct <= 10) return { score: 100, label: 'Dry',        cls: 'c-green' };
+  if (pct <= 25) return { score: 80,  label: 'Low risk',   cls: 'c-green' };
+  if (pct <= 50) return { score: 55,  label: 'Possible',   cls: 'c-brass' };
+  if (pct <= 75) return { score: 30,  label: 'Likely',     cls: 'c-orange' };
+  return { score: 10, label: 'Storm risk', cls: 'c-red' };
+}
+function scoreTemp(f) {
+  if (f < 40)  return { score: 30,  label: 'Cold',    cls: 'c-orange' };
+  if (f < 55)  return { score: 60,  label: 'Cool',    cls: 'c-brass' };
+  if (f <= 85) return { score: 100, label: 'Perfect', cls: 'c-green' };
+  if (f <= 95) return { score: 75,  label: 'Warm',    cls: 'c-brass' };
+  return { score: 50, label: 'Hot', cls: 'c-orange' };
+}
+function scoreCloud(pct) {
+  if (pct <= 20) return { score: 100, label: 'Clear',    cls: 'c-green' };
+  if (pct <= 50) return { score: 85,  label: 'Partly',   cls: 'c-green' };
+  if (pct <= 75) return { score: 65,  label: 'Mostly',   cls: 'c-brass' };
+  return { score: 40, label: 'Overcast', cls: 'c-orange' };
+}
+function scoreVis(km) {
+  if (km >= 20) return { score: 100, label: 'Excellent', cls: 'c-green' };
+  if (km >= 10) return { score: 80,  label: 'Good',      cls: 'c-green' };
+  if (km >= 5)  return { score: 55,  label: 'Moderate',  cls: 'c-brass' };
+  return { score: 25, label: 'Poor', cls: 'c-red' };
+}
+function overallScore(wind, precip, temp, cloud, vis) {
+  return Math.round(wind*0.35 + precip*0.25 + temp*0.15 + cloud*0.10 + vis*0.15);
+}
+function verdictFromScore(s) {
+  if (s >= 85) return { text: '✦ GREAT DAY TO BOAT', cls: 'c-green',  bg: 'bg-green' };
+  if (s >= 65) return { text: '◈ GOOD CONDITIONS',   cls: 'c-teal',   bg: '' };
+  if (s >= 45) return { text: '◎ USE CAUTION',        cls: 'c-orange', bg: 'bg-orange' };
+  return         { text: '⚠ NOT RECOMMENDED',         cls: 'c-red',    bg: 'bg-red' };
+}
+
+// ===== GAUGE HELPERS =====
+const ARC_LEN = 157, RING_LEN = 350;
+
+function setArcGauge(fillId, needleId, pct, color) {
+  const fill = document.getElementById(fillId);
+  const needle = document.getElementById(needleId);
+  const p = Math.min(Math.max(pct, 0), 1);
+  fill.style.strokeDasharray = `${p * ARC_LEN} 999`;
+  fill.style.stroke = color;
+  if (needle) needle.style.transform = `translateX(-50%) rotate(${-90 + p*180}deg)`;
+}
+
+function setScoreRing(score) {
+  const fill = document.getElementById('scoreFill');
+  fill.style.strokeDasharray = `${(score/100)*RING_LEN} 999`;
+  const color = score>=75?'var(--green)':score>=50?'var(--orange)':'var(--red)';
+  fill.style.stroke = color;
+  const num = document.getElementById('scoreNumber');
+  num.className = 'score-number '+(score>=75?'c-green':score>=50?'c-orange':'c-red');
+}
+
+function animateNumber(el, target, duration=1200) {
+  const start = performance.now(), from = parseInt(el.textContent)||0;
+  function step(now) {
+    const t = Math.min((now-start)/duration,1);
+    const ease = t<0.5?2*t*t:-1+(4-2*t)*t;
+    el.textContent = Math.round(from+(target-from)*ease);
+    if(t<1) requestAnimationFrame(step); else el.textContent=target;
+  }
+  requestAnimationFrame(step);
+}
+
+function colorForScore(s) { return s>=75?'var(--green)':s>=50?'var(--orange)':'var(--red)'; }
+function clsForScore(s)   { return s>=75?'c-green':s>=50?'c-orange':'c-red'; }
+
+function buildCondRow(name, score, note, cls) {
+  const barColor = colorForScore(score);
+  return `<div class="cond-row">
+    <div class="cond-top">
+      <div class="cond-name">${name}</div>
+      <div class="cond-score-badge ${cls}">${score}/100</div>
+    </div>
+    <div class="cond-bar-bg">
+      <div class="cond-bar-fill" style="width:0%;background:${barColor}" data-target="${score}"></div>
+    </div>
+    <div class="cond-note">${note}</div>
+  </div>`;
+}
+
+function animateBars() {
+  document.querySelectorAll('.cond-bar-fill').forEach(el => {
+    setTimeout(() => { el.style.width = el.dataset.target + '%'; }, 100);
+  });
+}
+
+// ===== SEARCH UI =====
+function onSearchInput(val) {
+  clearTimeout(searchTimeout);
+  highlightIdx = -1;
+  if (!val.trim()) { closeSuggestions(); return; }
+  searchTimeout = setTimeout(() => searchCities(val), 200);
+}
+
+function onSearchKey(e) {
+  const list = document.getElementById('suggestionsList');
+  const items = list.querySelectorAll('.suggestion-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    highlightIdx = Math.min(highlightIdx+1, items.length-1);
+    updateHighlight(items);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    highlightIdx = Math.max(highlightIdx-1, 0);
+    updateHighlight(items);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (highlightIdx >= 0 && searchResults[highlightIdx]) {
+      selectResult(searchResults[highlightIdx]);
+    } else if (searchResults.length > 0) {
+      selectResult(searchResults[0]);
+    }
+  } else if (e.key === 'Escape') {
+    closeSuggestions();
+  }
+}
+
+function updateHighlight(items) {
+  items.forEach((el, i) => {
+    el.classList.toggle('highlighted', i === highlightIdx);
+  });
+}
+
+async function searchCities(query) {
+  // First search presets
+  const q = query.toLowerCase();
+  const presetMatches = PRESET_CITIES.filter(c => c.name.toLowerCase().includes(q));
+
+  // Also query Nominatim for anything not in presets
+  let nominatimResults = [];
+  try {
+    const url = `${NOMINATIM_SEARCH}?q=${encodeURIComponent(query)}&format=json&limit=4&featuretype=city&addressdetails=1`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+    const data = await res.json();
+    nominatimResults = data
+      .filter(r => r.lat && r.lon)
+      .map(r => {
+        const a = r.address || {};
+        const city = a.city || a.town || a.village || r.display_name.split(',')[0];
+        const state = a.state || '';
+        const country = a.country_code?.toUpperCase() || '';
+        const label = state ? `${city}, ${state}` : `${city}, ${country}`;
+        return { name: label, lat: parseFloat(r.lat), lon: parseFloat(r.lon) };
+      })
+      .filter(r => !presetMatches.some(p => p.name === r.name));
+  } catch {}
+
+  searchResults = [...presetMatches.slice(0,4), ...nominatimResults.slice(0,4)];
+  showSuggestions(searchResults);
+}
+
+function showSuggestions(results) {
+  const list = document.getElementById('suggestionsList');
+  if (!results.length) { closeSuggestions(); return; }
+  list.innerHTML = results.map((r, i) =>
+    `<div class="suggestion-item" ontouchstart="selectResult(searchResults[${i}])" onclick="selectResult(searchResults[${i}])">${r.name}</div>`
+  ).join('');
+  list.classList.add('open');
+}
+
+function closeSuggestions() {
+  document.getElementById('suggestionsList').classList.remove('open');
+}
+
+function selectResult(r) {
+  currentLat = r.lat;
+  currentLon = r.lon;
+  currentCityName = r.name;
+  document.getElementById('locationInput').value = r.name;
+  closeSuggestions();
+  fetchForSelected();
+}
+
+function fetchForSelected() {
+  fetchWeatherAndRender(currentLat, currentLon, currentCityName);
+}
+
+// ===== WEATHER =====
+async function fetchWeatherAndRender(lat, lon, cityName) {
+  setLoading('Fetching weather data...');
+  try {
+    const url = `${OPEN_METEO}?latitude=${lat}&longitude=${lon}` +
+      `&current=temperature_2m,wind_speed_10m,precipitation_probability,cloud_cover,visibility` +
+      `&wind_speed_unit=mph&temperature_unit=fahrenheit&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Weather API failed');
+    const data = await res.json();
+    document.getElementById('headerStatus').textContent =
+      `${lat.toFixed(2)}° · ${Math.abs(lon).toFixed(2)}°`;
+    const oldTs = document.querySelector('.timestamp');
+    if (oldTs) oldTs.remove();
+    renderWeather(data, cityName);
+    showContent();
+  } catch(err) {
+    showError('Could not fetch weather data. Check your connection.\n\n' + err.message);
+  }
+}
+
+// ===== RENDER =====
+function renderWeather(data, cityName) {
+  const c = data.current;
+  const windMph  = Math.round(c.wind_speed_10m);
+  const precipPct = Math.round(c.precipitation_probability ?? 0);
+  const tempF    = Math.round(c.temperature_2m);
+  const cloudPct = Math.round(c.cloud_cover ?? 0);
+  const visKm    = Math.round((c.visibility ?? 10000) / 1000);
+
+  const wScore = scoreWind(windMph);
+  const pScore = scorePrecip(precipPct);
+  const tScore = scoreTemp(tempF);
+  const cScore = scoreCloud(cloudPct);
+  const vScore = scoreVis(visKm);
+  const overall = overallScore(wScore.score, pScore.score, tScore.score, cScore.score, vScore.score);
+  const verdict = verdictFromScore(overall);
+
+  setTimeout(() => { setScoreRing(overall); animateNumber(document.getElementById('scoreNumber'), overall); }, 100);
+
+  const vEl = document.getElementById('scoreVerdict');
+  vEl.textContent = verdict.text;
+  vEl.className = 'score-verdict ' + verdict.cls + ' ' + verdict.bg;
+
+  setTimeout(() => setArcGauge('windFill',  'windNeedle',  Math.min(windMph/40,1),                    colorForScore(wScore.score)), 200);
+  setTimeout(() => setArcGauge('cloudFill', 'cloudNeedle', cloudPct/100,                              colorForScore(cScore.score)), 300);
+  setTimeout(() => setArcGauge('tempFill',  'tempNeedle',  Math.min(Math.max((tempF-40)/60,0),1),      colorForScore(tScore.score)), 400);
+  setTimeout(() => setArcGauge('precipFill','precipNeedle',precipPct/100,                             colorForScore(pScore.score)), 500);
+
+  document.getElementById('windVal').textContent  = windMph;
+  document.getElementById('windSub').textContent  = wScore.label;
+  document.getElementById('windSub').className    = 'gauge-sub ' + wScore.cls;
+
+  document.getElementById('cloudVal').textContent = cloudPct;
+  document.getElementById('cloudSub').textContent = cScore.label;
+  document.getElementById('cloudSub').className   = 'gauge-sub ' + cScore.cls;
+
+  document.getElementById('tempVal').textContent  = tempF;
+  document.getElementById('tempSub').textContent  = tScore.label;
+  document.getElementById('tempSub').className    = 'gauge-sub ' + tScore.cls;
+
+  document.getElementById('precipVal').textContent = precipPct;
+  document.getElementById('precipSub').textContent = pScore.label;
+  document.getElementById('precipSub').className   = 'gauge-sub ' + pScore.cls;
+
+  const rows = document.getElementById('conditionRows');
+  rows.innerHTML =
+    buildCondRow('Wind',          wScore.score, `${windMph} mph — ${wScore.label}`,       clsForScore(wScore.score)) +
+    buildCondRow('Precipitation', pScore.score, `${precipPct}% chance — ${pScore.label}`, clsForScore(pScore.score)) +
+    buildCondRow('Temperature',   tScore.score, `${tempF}°F — ${tScore.label}`,           clsForScore(tScore.score)) +
+    buildCondRow('Cloud Cover',   cScore.score, `${cloudPct}% — ${cScore.label}`,         clsForScore(cScore.score)) +
+    buildCondRow('Visibility',    vScore.score, `~${visKm} km — ${vScore.label}`,         clsForScore(vScore.score));
+
+  setTimeout(animateBars, 300);
+
+  const now = new Date();
+  const ts = now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) +
+    ' · ' + now.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+  rows.insertAdjacentHTML('afterend', `<div class="timestamp">Updated ${ts} — ${cityName}</div>`);
+}
+
+// ===== FLOW =====
+function setLoading(msg) {
+  document.getElementById('loadingMsg').textContent = msg;
+  document.getElementById('loadingScreen').classList.remove('hidden');
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('errorDiv').style.display = 'none';
+}
+function showError(msg) {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('mainContent').style.display = 'none';
+  document.getElementById('errorDiv').style.display = 'block';
+  document.getElementById('errorMsg').textContent = msg;
+}
+function showContent() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('mainContent').style.display = 'block';
+  document.getElementById('errorDiv').style.display = 'none';
+}
+
+// Close suggestions on outside tap
+document.addEventListener('click', e => {
+  if (!e.target.closest('.location-search-wrap')) closeSuggestions();
+});
+
+// Init with Orlando
+function init() {
+  try {
+    const input = document.getElementById('locationInput');
+    if (input) input.value = 'Orlando, FL';
+  } catch(e) {}
+  fetchWeatherAndRender(28.5383, -81.3792, 'Orlando, FL');
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
